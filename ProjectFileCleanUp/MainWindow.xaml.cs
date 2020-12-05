@@ -173,6 +173,7 @@ namespace ProjectFileCleanUp
         private void OnDeleteFile(object sender, RoutedEventArgs e)
         {
             DeleteAllItem(m_pModeView.ScanFileList);
+            m_pModeView.ScanFileList.Clear();
         }
 
         private void DeleteAllItem(ObservableCollection<ModeView.FileItemModeView> files)
@@ -184,11 +185,18 @@ namespace ProjectFileCleanUp
                     FileInfo fileInfo = new FileInfo(item.FullName);
                     fileInfo.Delete();
                 }
-                else
+                else if(item.Attributes == FileAttributes.Directory)
                 {
-                    DirectoryInfo directoryInfo = new DirectoryInfo(item.FullName);
-                    DeleteAllFileInFolder(item.FullName);
-                    directoryInfo.Delete();
+                    if(item.IsSelect == true)
+                    {
+                        DirectoryInfo directoryInfo = new DirectoryInfo(item.FullName);
+                        DeleteAllFileInFolder(item.FullName);
+                        directoryInfo.Delete();
+                    }
+                    else
+                    {
+                        DeleteAllItem(item.FileItems);
+                    }
                 }
             }
         }
