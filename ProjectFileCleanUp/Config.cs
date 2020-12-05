@@ -74,5 +74,36 @@ namespace ProjectFileCleanUp
 
             return historyScan;
         }
+
+        public static void SaveScanType(string data)
+        {
+            do
+            {
+                var reg = OpenRegPath();
+                if(reg == null)
+                {
+                    break;
+                }
+
+                reg.SetValue("ScanTypes", data);
+            } while (false);
+        }
+
+        public static string LoadScanType()
+        {
+            string str = "";
+            do
+            {
+                var reg = OpenRegPath();
+                if (reg == null)
+                {
+                    break;
+                }
+
+                str = (string)reg.GetValue("ScanTypes", "");
+            } while (false);
+
+            return str;
+        }
     }
 }

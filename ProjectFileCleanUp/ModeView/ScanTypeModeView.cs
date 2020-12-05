@@ -27,11 +27,12 @@ namespace ProjectFileCleanUp.ModeView
 
         }
 
-        public ScanTypeModeView(bool IsUse, string data, ScanType type)
+        public ScanTypeModeView(bool IsUse, string data, ScanType type, PropertyChangedEventHandler propertyChangedEventHandler)
         {
             m_bIsUse = IsUse;
             m_strData = data;
             m_Type = type;
+            PropertyChanged += propertyChangedEventHandler;
         }
 
         public bool IsUse
@@ -40,7 +41,7 @@ namespace ProjectFileCleanUp.ModeView
             set
             {
                 m_bIsUse = value;
-                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsUse)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsUse"));
             }
         }
 

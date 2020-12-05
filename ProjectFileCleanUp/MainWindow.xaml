@@ -83,7 +83,7 @@
                         <Grid x:Name="NameGrid" Grid.Column="1"/>
                         <Grid x:Name="TypeGrid" Grid.Column="2"/>
                     </Grid>
-                    <ListView Grid.Row="1" ItemsSource="{Binding ScanTypeList}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}">
+                    <ListView Grid.Row="1" ItemsSource="{Binding ScanTypeList, Mode=TwoWay}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}">
                         <ListView.View>
                             <GridView>
                                 <GridView.Columns>
@@ -93,7 +93,7 @@
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IsUse}" VerticalAlignment="Center" Click="IsFullCheckbox_Click"/>
+                                                <CheckBox IsChecked="{Binding IsUse}" VerticalAlignment="Center"/>
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>

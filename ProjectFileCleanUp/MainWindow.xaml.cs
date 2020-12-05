@@ -1,7 +1,9 @@
 ﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -31,7 +33,10 @@ namespace ProjectFileCleanUp
             DataGrid.DataContext = m_pModeView;
 
             LoadScanPath();
+            LoadScanType();
+            ScanTypeCheckChanged(null, null);
         }
+
 
         private void IsFullCheckbox_Click(object sender, RoutedEventArgs e)
         {
@@ -62,6 +67,13 @@ namespace ProjectFileCleanUp
 
             m_pModeView.IsFullSelect = bRet;
         }
+
+#nullable enable
+        private void ScanTypeCheckChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            IsFullCheckbox_Click(null, null);
+        }
+#nullable disable
 
         private void OnStartScan(object sender, RoutedEventArgs e)
         {
@@ -95,6 +107,7 @@ namespace ProjectFileCleanUp
                 });
             });
 
+            SaveScanType();
             SaveScanPath();
             LoadScanPath();
             if(m_pModeView.HistoryScanPath.Count > 0)
@@ -256,8 +269,8 @@ namespace ProjectFileCleanUp
             var repeatCheck = from scanType in m_pModeView.ScanTypeList where (scanType.Type == type) && scanType.Data.Equals(m_pModeView.Input, StringComparison.OrdinalIgnoreCase) == true select scanType;
             if(repeatCheck.Count() == 0)
             {
-                m_pModeView.ScanTypeList.Add(new ModeView.ScanTypeModeView(false, m_pModeView.Input, type));
-                IsFullCheckbox_Click(null, null);
+                m_pModeView.ScanTypeList.Add(new ModeView.ScanTypeModeView(false, m_pModeView.Input, type, ScanTypeCheckChanged));
+                //IsFullCheckbox_Click(null, null);
             }
         }
 
@@ -303,6 +316,36 @@ namespace ProjectFileCleanUp
             {
                 m_pModeView.HistoryScanPath.Add(item);
             }
+        }
+
+        private void SaveScanType()
+        {
+            DateTimeOffset dto = new DateTimeOffset(DateTime.Now);
+            var unixTime = dto.ToUnixTimeSeconds();
+
+            ScanTypeJson scanTypeJson = new ScanTypeJson();
+            scanTypeJson.Version = unixTime;
+
+            scanTypeJson.ScanTypes.AddRange(m_pModeView.ScanTypeList);
+
+            string strJson = JsonConvert.SerializeObject(scanTypeJson);
+            Config.SaveScanType(strJson);
+        }
+
+        private void LoadScanType()
+        {
+            var strJson = Config.LoadScanType();
+            ScanTypeJson scanTypeJson = JsonConvert.DeserializeObject<ScanTypeJson>(strJson);
+            m_pModeView.ScanTypeList.Clear();
+            if(scanTypeJson != null)
+            {
+                foreach (var item in scanTypeJson.ScanTypes)
+                {
+                    item.PropertyChanged += ScanTypeCheckChanged;
+                    m_pModeView.ScanTypeList.Add(item);
+                }
+            }
+
         }
     }
 }
