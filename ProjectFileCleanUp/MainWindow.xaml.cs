@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -28,6 +29,8 @@ namespace ProjectFileCleanUp
             InitializeComponent();
 
             DataGrid.DataContext = m_pModeView;
+
+            LoadScanPath();
         }
 
         private void IsFullCheckbox_Click(object sender, RoutedEventArgs e)
@@ -66,13 +69,23 @@ namespace ProjectFileCleanUp
             m_pModeView.ScanFileList.Clear();
 
             string strScanBasePath = m_pModeView.ScanPath;
+            
             List<ModeView.ScanTypeModeView> scanTypes = new List<ModeView.ScanTypeModeView>();
 
             var scanTypeCollect = from scanType in m_pModeView.ScanTypeList where scanType.IsUse == true select scanType;
             scanTypes.AddRange(scanTypeCollect);
 
             Task.Factory.StartNew(()=> {
-                var collect = ScanFile(strScanBasePath, scanTypes);
+                ObservableCollection<ModeView.FileItemModeView> collect = new ObservableCollection<ModeView.FileItemModeView>();
+                try
+                {
+                    collect = ScanFile(strScanBasePath, scanTypes);
+                }
+                catch (Exception)
+                {
+
+                }
+                
                 this.Dispatcher.Invoke(()=> {
                     foreach (var item in collect)
                     {
@@ -81,6 +94,14 @@ namespace ProjectFileCleanUp
                     m_pModeView.IsScanning = false;
                 });
             });
+
+            SaveScanPath();
+            LoadScanPath();
+            if(m_pModeView.HistoryScanPath.Count > 0)
+            {
+                m_pModeView.ScanPath = m_pModeView.HistoryScanPath[0];
+            }
+            
         }
 
         private ObservableCollection<ModeView.FileItemModeView> ScanFile(string strBaseDir, List<ModeView.ScanTypeModeView> scanType)
@@ -266,6 +287,22 @@ namespace ProjectFileCleanUp
                     checkBox.IsChecked = false;
                 }
             } while (false);
+        }
+
+        private void SaveScanPath()
+        {
+            Config.SaveScanPath(m_pModeView.ScanPath);
+        }
+
+        private void LoadScanPath()
+        {
+            var scanHistory = Config.LoadScanPath();
+
+            m_pModeView.HistoryScanPath.Clear();
+            foreach (var item in scanHistory)
+            {
+                m_pModeView.HistoryScanPath.Add(item);
+            }
         }
     }
 }
