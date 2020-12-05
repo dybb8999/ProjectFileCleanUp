@@ -12,6 +12,7 @@
             <ValueConvert:ScanTypeLabelVisiblityValueConvert x:Key="ScanTypeLabelVisiblityValueConvert"/>
             <ValueConvert:ScanTypeIsFullSelectValueConvert x:Key="ScanTypeIsFullSelectValueConvert"/>
             <ValueConvert:FileTypeToImageValueConvert x:Key="FileTypeToImageValueConvert" FileImage="Resource/default.png" FolderImage="Resource/folder.png"/>
+            <ValueConvert:EnableStatusValueConvert x:Key="EnableStatusValueConvert"/>
         </ResourceDictionary>
     </Window.Resources>
     <Grid x:Name="DataGrid">
@@ -31,11 +32,15 @@
                     <ColumnDefinition Width="*"/>
                     <!--路径选择按钮-->
                     <ColumnDefinition Width="Auto"/>
+                    <!--删除按钮-->
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="扫描路径：" Grid.Column="0" VerticalAlignment="Center"/>
-                <ComboBox IsEditable="True" Grid.Column="1" VerticalAlignment="Center" SelectedValue="{Binding ScanPath, Mode=OneWayToSource}" ItemsSource="{Binding HistoryScanPath}"/>
-                <Button Content="扫描" Grid.Column="2" Width="40"/>
+                <ComboBox IsEditable="True" Grid.Column="1" VerticalAlignment="Center" Text="{Binding ScanPath}" ItemsSource="{Binding HistoryScanPath}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}"/>
+                <Button Content="扫描" Grid.Column="2" Width="40" Click="OnStartScan" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}"/>
+                <Button Content="删除" Grid.Column="3" Width="40" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}" Click="OnDeleteFile"/>
+
             </Grid>
         </GroupBox>
 
@@ -59,16 +64,16 @@
                             <TextBlock Text="文件夹：" VerticalAlignment="Center" Visibility="{Binding ElementName=comboBoxScanType, Path=SelectedItem.Tag, Converter={StaticResource ScanTypeLabelVisiblityValueConvert}, ConverterParameter=Folder}"/>
                         </Grid>
 
-                        <TextBox Text="{Binding Input}" Width="80"/>
-                        <ComboBox Name="comboBoxScanType" SelectedIndex="0" Width="70" SelectedValue="{Binding ScanTypeSelect,Mode=OneWayToSource}">
+                        <TextBox Text="{Binding Input}" Width="80" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}"/>
+                        <ComboBox Name="comboBoxScanType" SelectedIndex="0" Width="70" Text="{Binding ScanTypeSelect,Mode=OneWayToSource}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}">
                             <ComboBoxItem Content="后缀" Tag="Suffix"/>
                             <ComboBoxItem Content="文件夹" Tag="Folder"/>
                         </ComboBox>
-                        <Button Content="添加" Width="40"/>
+                        <Button Content="添加" Width="40" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}" Click="OnAddScanType"/>
                     </WrapPanel>
 
                     <!--ListView列宽度自动-->
-                    <Grid Grid.Row="1" >
+                    <Grid Grid.Row="1" Margin="10,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="30"/>
                             <ColumnDefinition Width="*"/>
@@ -78,13 +83,13 @@
                         <Grid x:Name="NameGrid" Grid.Column="1"/>
                         <Grid x:Name="TypeGrid" Grid.Column="2"/>
                     </Grid>
-                    <ListView Grid.Row="1" ItemsSource="{Binding ScanTypeList}">
+                    <ListView Grid.Row="1" ItemsSource="{Binding ScanTypeList}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}">
                         <ListView.View>
                             <GridView>
                                 <GridView.Columns>
                                     <GridViewColumn Width="{Binding ElementName=CheckboxGrid, Path=ActualWidth}">
                                         <GridViewColumn.Header>
-                                            <CheckBox IsChecked="{Binding IsFullSelect}" VerticalAlignment="Center" IsThreeState="True"/>
+                                            <CheckBox IsChecked="{Binding IsFullSelect}" VerticalAlignment="Center" IsThreeState="True" Click="OnScanTypeListStatusChange"/>
                                         </GridViewColumn.Header>
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>

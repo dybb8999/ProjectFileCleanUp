@@ -14,8 +14,10 @@ namespace ProjectFileCleanUp.ModeView
         public event PropertyChangedEventHandler PropertyChanged;
 
         string m_strName = "";
+        string m_strFullName = "";
         ObservableCollection<FileItemModeView> m_fileItems = new ObservableCollection<FileItemModeView>();
         FileAttributes m_Attributes;
+        bool m_bIsSelect = false;
 
         public FileItemModeView()
         {
@@ -55,6 +57,26 @@ namespace ProjectFileCleanUp.ModeView
             {
                 m_Attributes = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Attributes)));
+            }
+        }
+
+        public string FullName
+        {
+            get => m_strFullName;
+            set
+            {
+                m_strFullName = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullName)));
+            }
+        }
+
+        public bool IsSelect
+        {
+            get => m_bIsSelect;
+            set
+            {
+                m_bIsSelect = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelect)));
             }
         }
     }
