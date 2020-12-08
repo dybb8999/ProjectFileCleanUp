@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -335,17 +336,67 @@ namespace ProjectFileCleanUp
         private void LoadScanType()
         {
             var strJson = Config.LoadScanType();
-            ScanTypeJson scanTypeJson = JsonConvert.DeserializeObject<ScanTypeJson>(strJson);
-            m_pModeView.ScanTypeList.Clear();
-            if(scanTypeJson != null)
+            SetScanTypeList(strJson);
+
+        }
+
+        private void OnUpdateScanTypes(object sender, RoutedEventArgs e)
+        {
+            try
             {
-                foreach (var item in scanTypeJson.ScanTypes)
+                HttpWebRequest request = (HttpWebRequest)WebRequest.CreateHttp("https://raw.githubusercontent.com/dybb8999/ProjectFileCleanUp/master/Config/ScanTypes.json");
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                using (StreamReader readStream = new StreamReader(response.GetResponseStream()))
                 {
-                    item.PropertyChanged += ScanTypeCheckChanged;
-                    m_pModeView.ScanTypeList.Add(item);
+                    string strJson = readStream.ReadToEnd();
+                    SetScanTypeList(strJson);
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
 
+        private void SetScanTypeList(string strJson)
+        {
+            try
+            {
+                ScanTypeJson scanTypeJson = JsonConvert.DeserializeObject<ScanTypeJson>(strJson);
+                m_pModeView.ScanTypeList.Clear();
+                if (scanTypeJson != null)
+                {
+                    foreach (var item in scanTypeJson.ScanTypes)
+                    {
+                        item.PropertyChanged += ScanTypeCheckChanged;
+                        m_pModeView.ScanTypeList.Add(item);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void OnRemoteScanType(object sender, RoutedEventArgs e)
+        {
+            do
+            {
+                var pDeleteButton = sender as Button;
+                if(pDeleteButton == null)
+                {
+                    break;
+                }
+
+                var pScanType = pDeleteButton.DataContext as ModeView.ScanTypeModeView;
+                if(pScanType == null)
+                {
+                    break;
+                }
+
+                m_pModeView.ScanTypeList.Remove(pScanType);
+            } while (false);
         }
     }
 }

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ProjectFileCleanUp"
         xmlns:ValueConvert="clr-namespace:ProjectFileCleanUp.ValueConvert"
+        xmlns:ModeView="clr-namespace:ProjectFileCleanUp.ModeView"
         mc:Ignorable="d"
         Title="项目文件清理" Height="450" Width="800">
     <Window.Resources>
@@ -70,6 +71,7 @@
                             <ComboBoxItem Content="文件夹" Tag="Folder"/>
                         </ComboBox>
                         <Button Content="添加" Width="40" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}" Click="OnAddScanType"/>
+                        <Button Content="更新" Width="40" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}" Click="OnUpdateScanTypes"/>
                     </WrapPanel>
 
                     <!--ListView列宽度自动-->
@@ -78,12 +80,14 @@
                             <ColumnDefinition Width="30"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
                         <Grid x:Name="CheckboxGrid" Grid.Column="0"/>
                         <Grid x:Name="NameGrid" Grid.Column="1"/>
                         <Grid x:Name="TypeGrid" Grid.Column="2"/>
+                        <Grid x:Name="DeleteGrid" Grid.Column="3"/>
                     </Grid>
-                    <ListView Grid.Row="1" ItemsSource="{Binding ScanTypeList, Mode=TwoWay}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}">
+                    <ListView x:Name="ScanTypeListView" Grid.Row="1" ItemsSource="{Binding ScanTypeList, Mode=TwoWay}" IsEnabled="{Binding IsScanning, Converter={StaticResource EnableStatusValueConvert}, ConverterParameter=runningdisable}">
                         <ListView.View>
                             <GridView>
                                 <GridView.Columns>
@@ -99,6 +103,13 @@
                                     </GridViewColumn>
                                     <GridViewColumn Header="名称" DisplayMemberBinding="{Binding Data}" Width="{Binding ElementName=NameGrid, Path=ActualWidth}"/>
                                     <GridViewColumn Header="类型" DisplayMemberBinding="{Binding Type}" Width="{Binding ElementName=TypeGrid, Path=ActualWidth}"/>
+                                    <GridViewColumn Header="操作" Width="{Binding ElementName=DeleteGrid, Path=ActualWidth}">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="删除" Click="OnRemoteScanType"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
                                 </GridView.Columns>
                             </GridView>
                         </ListView.View>
